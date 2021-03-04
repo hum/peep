@@ -1,15 +1,17 @@
-package internal
+package peep
 
 import (
   "fmt"
   "net"
   "time"
   "io"
+
+  "github.com/hum/peep/internal"
 )
 
 type Whois struct {
   Domains []string
-  parser *Parser
+  parser *internal.Parser
   currExt string
 }
 
@@ -18,8 +20,8 @@ const (
   DEFAULT_PORT = "43"
 )
 
-func initParser() *Parser {
-  return &Parser{}
+func initParser() *internal.Parser {
+  return &internal.Parser{}
 }
 
 func (w *Whois) Search(name string, servers ...string) (bool, error) {
