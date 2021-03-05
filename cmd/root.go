@@ -6,21 +6,21 @@ import (
 	"net/http"
 	"os"
 	"strings"
-  "sync"
+	"sync"
 
 	"github.com/hum/peep"
 	"github.com/spf13/cobra"
 )
 
 const (
-  // limit the amount of workers for debug/development purposes
-  // default value will be 25
-  workers = 1
+	// limit the amount of workers for debug/development purposes
+	// default value will be 25
+	workers = 1
 )
 
 var (
-  wg *sync.WaitGroup
-  in chan string
+	wg *sync.WaitGroup
+	in chan string
 
 	domainName string
 	domainFile string
@@ -45,34 +45,34 @@ func run(cmd *cobra.Command, args []string) {
 		panic(err)
 	}
 
-  wg = new(sync.WaitGroup)
-  in = make(chan string, 2*workers)
+	wg = new(sync.WaitGroup)
+	in = make(chan string, 2*workers)
 
 	domains := strings.Split(string(data), "\n")
 	fmt.Println(domains)
 
-  for i := 0; i < workers; i++ {
-    wg.Add(1)
-    go func() {
-      defer wg.Done()
-      for d := range in {
-        if ok, err := whois.Search(domainName, d); err == nil {
-          if !ok {
-            fmt.Println("Domain: ", domainName+d, " is available.")
-          } else {
-            fmt.Println("Domain: ", domainName+d, " is taken.")
-          }
-        }
-      }
-    }()
-  }
+	for i := 0; i < workers; i++ {
+		wg.Add(1)
+		go func() {
+			defer wg.Done()
+			for d := range in {
+				if ok, err := whois.Search(domainName, d); err == nil {
+					if !ok {
+						fmt.Println("Domain: ", domainName+d, " is available.")
+					} else {
+						fmt.Println("Domain: ", domainName+d, " is taken.")
+					}
+				}
+			}
+		}()
+	}
 
-  for _, d := range domains {
-    in <- d
-  }
+	for _, d := range domains {
+		in <- d
+	}
 
-  close(in)
-  wg.Wait()
+	close(in)
+	wg.Wait()
 }
 
 func getDomains(file string) ([]byte, error) {
