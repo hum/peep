@@ -1,11 +1,14 @@
 # peep
+<p align="center"><img src="https://cdn.discordapp.com/emojis/653488219840708608.gif?v=1"/></p>
 
+------------------------------------------------------------------------------------------
 A super easy to use CLI tool to find available domain TLDs with a specific domain name.
 
+#### Currently fully supported: 56 
+
 ### TODO:
-  - [ ] Parse responses from the WHOIS servers
   - [ ] Make the CLI output pretty
-  - [ ] Better README
+  - [ ] Support most domains
   - [ ] Test inputs
 
 ### Usage (WIP)
