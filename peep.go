@@ -40,8 +40,6 @@ func (w *Whois) Search(name, domain string, servers ...string) (bool, error) {
 		if err != nil {
 			return false, err
 		}
-		result = cleanup(result)
-
 		w.parser.Domain = domain
 		/*
 		   TODO:
@@ -63,19 +61,6 @@ func (w *Whois) Search(name, domain string, servers ...string) (bool, error) {
 		}
 	}
 	return true, nil
-}
-
-// temp function to de-clutter output
-func cleanup(data string) string {
-	var result []string
-
-	for _, line := range strings.Split(data, "\n") {
-		if len(line) == 0 || string(line[0]) == "%" {
-			continue
-		}
-		result = append(result, line)
-	}
-	return strings.Join(result, "\n")
 }
 
 func (w *Whois) lookup(name, server string, timeout time.Duration) (string, error) {

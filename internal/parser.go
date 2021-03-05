@@ -21,6 +21,11 @@ var (
 		"is available for registration",
 		"has not been registered",
 		"no object found",
+		"free",
+		"available",
+		"no entries found",
+		"No_Se_Encontro_El_Objeto/Object_Not_Found",
+		"Status: invalid",
 	}
 )
 
@@ -40,21 +45,54 @@ func (p *Parser) GetReferServer(data string) (string, error) {
 }
 
 func (p *Parser) IsFound(data string) bool {
-	split := strings.Split(strings.TrimSpace(data), "\n")
-	// special case for domains like .ai
-	if strings.Contains(split[0], "Domain Name: ") {
-		data = split[1]
-	} else {
-		data = split[0]
-	}
+	var split []string
 
-	for _, v := range keywords {
-		if strings.Contains(strings.ToLower(data), v) {
-			return false
+	for _, line := range strings.Split(data, "\n") {
+		line = strings.TrimSpace(line)
+
+		if len(line) <= 1 {
+			continue
+		}
+		/*if strings.Contains(string(line[0]), "%") || strings.Contains(string(line[0]), "#") {
+		  if strings.Contains(string(line[1]), "%") {
+		    split = append(split, line)
+		  } else {
+		    continue
+		  }
+		}*/
+		split = append(split, line)
+	}
+	// special case for domains like .ai
+	// TODO:
+	// rewrite this horrid thing
+	// but hey, it works for now
+	for _, line := range split {
+		for _, k := range keywords {
+			if strings.Contains(strings.ToLower(line), strings.ToLower(k)) {
+				return false
+			}
 		}
 	}
 	fmt.Println(p.Domain)
 	return true
+
+	/*if strings.Contains(split[0], "Domain Name: ") || strings.Contains(split[0], "Domain: ") {
+	    if strings.Contains(split[1], "Script: ") {
+	      data = split[2]
+	    } else {
+	      data = split[1]
+	    }
+		} else {
+			data = split[0]
+		}
+
+		for _, v := range keywords {
+			if strings.Contains(strings.ToLower(data), v) {
+				return false
+			}
+		}
+		fmt.Println(p.Domain)
+		return true*/
 }
 
 func (p *Parser) getReferServer(data string) (string, error) {
