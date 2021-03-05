@@ -1,6 +1,5 @@
 .com
 .net
-.co
 .org
 .dev
 .tv
@@ -37,7 +36,6 @@
 .online
 .protection
 .security
-.services
 .site
 .software
 .solar
