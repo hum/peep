@@ -36,15 +36,16 @@ func run(cmd *cobra.Command, args []string) {
 	}
 
 	domains := strings.Split(string(data), "\n")
+	fmt.Println(domains)
 
 	for _, d := range domains {
-		result, err := whois.Search(domainName, d)
-		if err != nil {
-			fmt.Println(err)
-			os.Exit(0)
+		if ok, err := whois.Search(domainName, d); err == nil {
+			if !ok {
+				fmt.Println("Domain: ", domainName+d, " is available.")
+			} else {
+				fmt.Println("Domain: ", domainName+d, " is taken.")
+			}
 		}
-
-		fmt.Println(result)
 	}
 }
 

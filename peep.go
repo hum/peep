@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"net"
+	"strings"
 	"time"
 
 	"github.com/hum/peep/internal"
@@ -39,15 +40,42 @@ func (w *Whois) Search(name, domain string, servers ...string) (bool, error) {
 		if err != nil {
 			return false, err
 		}
+		result = cleanup(result)
 
+		w.parser.Domain = domain
 		/*
 		   TODO:
 		   Parse response (internal.Parser) and find if it points to another WHOIS server
 		   If not, return; if yes, search for the final one
 		*/
-		fmt.Println(result)
+		ref, err := w.parser.GetReferServer(result)
+		if err != nil {
+			return false, err
+		}
+
+		result, err = w.lookup(name+domain, ref, time.Second*15)
+		if err != nil {
+			return false, err
+		}
+
+		if ok := w.parser.IsFound(result); !ok {
+			return false, nil
+		}
 	}
 	return true, nil
+}
+
+// temp function to de-clutter output
+func cleanup(data string) string {
+	var result []string
+
+	for _, line := range strings.Split(data, "\n") {
+		if len(line) == 0 || string(line[0]) == "%" {
+			continue
+		}
+		result = append(result, line)
+	}
+	return strings.Join(result, "\n")
 }
 
 func (w *Whois) lookup(name, server string, timeout time.Duration) (string, error) {
