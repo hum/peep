@@ -4,7 +4,7 @@
 ------------------------------------------------------------------------------------------
 A super easy to use CLI tool to find available domain TLDs with a specific domain name.
 
-#### Currently fully supported: 56 
+#### Currently fully supported: 152 
 
 ### TODO:
   - [ ] Make the CLI output pretty
