@@ -2,9 +2,9 @@
 <p align="center"><img src="https://cdn.discordapp.com/emojis/653488219840708608.gif?v=1"/></p>
 
 ------------------------------------------------------------------------------------------
-A super easy to use CLI tool to find available domain TLDs with a specific domain name.
+**WORK IN PROGRESS - DOES NOT WORK YET**
 
-#### Currently fully supported: 152 
+A super easy to use CLI tool to find available domain TLDs with a specific domain name.
 
 ### TODO:
   - [ ] Make the CLI output pretty
