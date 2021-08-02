@@ -1,25 +1,17 @@
+<p align="center"><img src="static/logo.png" width="100" height="100"/></p>
+
 # peep
-<p align="center"><img src="static/logo.png"/></p>
+A work-in-progress CLI tool to search for available domain names in the list of supported TLDs.
 
-------------------------------------------------------------------------------------------
-**WORK IN PROGRESS - DOES NOT WORK YET**
-
-A super easy to use CLI tool to find available domain TLDs with a specific domain name.
-
-### TODO:
-  - [ ] Make the CLI output pretty
-  - [ ] Support most domains
-  - [ ] Test inputs
-
-### Usage (WIP)
+## Usage
 #### Installation
 ```bash
 > go install github.com/hum/peep
 ```
 #### Run
-You can either include your own `domain_list_text_file` or the app will fetch the one present in this repository. (e.g. `domains.txt`)
+You can either include your own `domain_list_file` or the [default list](https://github.com/hum/peep/blob/main/domains.txt) stored in this repo will be used.
 ```bash
-> peep -n [domain_name] -f [domain_list_text_file]
+> peep -n [domain_name] -f [domain_list_file]
 ```
 
 #### Example
