@@ -13,9 +13,7 @@ import (
 )
 
 const (
-	// limit the amount of workers for debug/development purposes
-	// default value will be 25
-	workers = 1
+	workers = 25
 )
 
 var (
