@@ -1,5 +1,5 @@
 # peep
-<p align="center"><img src="https://cdn.discordapp.com/emojis/653488219840708608.gif?v=1"/></p>
+<p align="center"><img src="static/logo.png"/></p>
 
 ------------------------------------------------------------------------------------------
 **WORK IN PROGRESS - DOES NOT WORK YET**
