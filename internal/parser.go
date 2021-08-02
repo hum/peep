@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	WHOIS = "whois:"
-  REGISTRAR = "Registrar WHOIS Server:"
+	WHOIS     = "whois:"
+	REGISTRAR = "Registrar WHOIS Server:"
 )
 
 var (
@@ -97,8 +97,8 @@ func (p *Parser) IsFound(data string) bool {
 func (p *Parser) getReferServer(data string) (string, error) {
 	for _, line := range strings.Split(data, "\n") {
 		if strings.Contains(line, WHOIS) || strings.Contains(line, REGISTRAR) {
-      return line, nil
+			return line, nil
 		}
 	}
-  return "", fmt.Errorf("Could not find ref server.")
+	return "", fmt.Errorf("Could not find ref server.")
 }
