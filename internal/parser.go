@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	REFER = "refer:"
 	WHOIS = "whois:"
+  REGISTRAR = "Registrar WHOIS Server:"
 )
 
 var (
@@ -21,7 +21,6 @@ var (
 		"is available for registration",
 		"has not been registered",
 		"no object found",
-		"free",
 		"available",
 		"no entries found",
 		"No_Se_Encontro_El_Objeto/Object_Not_Found",
@@ -73,7 +72,7 @@ func (p *Parser) IsFound(data string) bool {
 			}
 		}
 	}
-	fmt.Println(p.Domain)
+	//fmt.Println(p.Domain)
 	return true
 
 	/*if strings.Contains(split[0], "Domain Name: ") || strings.Contains(split[0], "Domain: ") {
@@ -97,9 +96,9 @@ func (p *Parser) IsFound(data string) bool {
 
 func (p *Parser) getReferServer(data string) (string, error) {
 	for _, line := range strings.Split(data, "\n") {
-		if strings.Contains(line, REFER) || strings.Contains(line, WHOIS) {
-			return line, nil
+		if strings.Contains(line, WHOIS) || strings.Contains(line, REGISTRAR) {
+      return line, nil
 		}
 	}
-	return "", fmt.Errorf("Could not find ref server.")
+  return "", fmt.Errorf("Could not find ref server.")
 }
