@@ -12,16 +12,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	workers = 25
-)
-
 var (
 	wg *sync.WaitGroup
 	in chan string
 
 	domainName string
 	domainFile string
+	workers int
 
 	whois = peep.Whois{}
 
@@ -47,7 +44,6 @@ func run(cmd *cobra.Command, args []string) {
 	in = make(chan string, 2*workers)
 
 	domains := strings.Split(string(data), "\n")
-	fmt.Println(domains)
 
 	for i := 0; i < workers; i++ {
 		wg.Add(1)
@@ -107,4 +103,5 @@ func Execute() {
 func init() {
 	rootCmd.PersistentFlags().StringVarP(&domainName, "name", "n", "", "domain name to search for")
 	rootCmd.Flags().StringVarP(&domainFile, "file", "f", "", "text file containing all of the domains")
+	rootCmd.Flags().IntVarP(&workers, "workers", "w", 25, "how many concurrent workers to run")
 }
