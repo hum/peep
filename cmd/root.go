@@ -12,13 +12,18 @@ import (
 	"github.com/spf13/cobra"
 )
 
+const (
+	AVAILABLE = "\033[38;5;10m%s\033[39;49m\n"
+	TAKEN     = "\033[38;5;9m%s\033[39;49m\n"
+)
+
 var (
 	wg *sync.WaitGroup
 	in chan string
 
 	domainName string
 	domainFile string
-	workers int
+	workers    int
 
 	whois = peep.Whois{}
 
@@ -52,9 +57,11 @@ func run(cmd *cobra.Command, args []string) {
 			for d := range in {
 				if ok, err := whois.Search(domainName, d); err == nil {
 					if !ok {
-						fmt.Println("Domain: ", domainName+d, " is available.")
+						result := domainName + d + " is available."
+						fmt.Printf(AVAILABLE, result)
 					} else {
-						fmt.Println("Domain: ", domainName+d, " is taken.")
+						result := domainName + d + " is taken."
+						fmt.Printf(TAKEN, result)
 					}
 				}
 			}
