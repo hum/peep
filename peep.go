@@ -1,88 +1,126 @@
-package peep
+package main
 
 import (
+	"flag"
 	"fmt"
-	"io"
-	"net"
+	"runtime"
+	"sync"
 	"time"
 
-	"github.com/hum/peep/internal"
+	"github.com/hum/peep/pkg/colour"
+	"github.com/hum/peep/pkg/domain"
+	"github.com/hum/peep/pkg/lookup"
 )
 
-type Whois struct {
-	parser *internal.Parser
-}
+var (
+	domainName     string
+	workerPool     int
+	runningWorkers int
+	wg             sync.WaitGroup
+
+	availableCount int
+	takenCount     int
+)
 
 const (
-	IANA_SERVER  = "whois.iana.org"
-	DEFAULT_PORT = "43"
+	IS_TAKEN     = "[❌] "
+	IS_AVAILABLE = "[✅] "
 )
 
-func initParser() *internal.Parser {
-	return &internal.Parser{}
+func resolve(in <-chan string, out chan<- string, wg *sync.WaitGroup) {
+	defer func() {
+		wg.Done()
+		runningWorkers--
+	}()
+
+	for dn := range in {
+		taken, err := lookup.IsTaken(dn)
+		if err != nil {
+			fmt.Printf("error for domain: %s, got error: %s\n", dn, err)
+			continue
+		}
+
+		var result string
+		if taken {
+			// Domain is taken
+			result = fmt.Sprintf("%s %s", IS_TAKEN, dn)
+			result = colour.SetColour(colour.ColourRed, result)
+			takenCount++
+		} else {
+			// Domain is free
+			result = fmt.Sprintf("%s %s", IS_AVAILABLE, dn)
+			result = colour.SetColour(colour.ColourGreen, result)
+			availableCount++
+		}
+		out <- result
+	}
 }
 
-func (w *Whois) Search(name, domain string, servers ...string) (bool, error) {
-	if name == "" {
-		return false, fmt.Errorf("Domain name is unspecified.")
-	}
-	if w.parser == nil {
-		w.parser = initParser()
+func main() {
+	var maxWorkerPool int = runtime.GOMAXPROCS(0)
+
+	flag.StringVar(&domainName, "domain", "", "domain name to look up")
+	flag.StringVar(&domainName, "d", "", "domain name to look up")
+	flag.IntVar(&workerPool, "jobs", maxWorkerPool, "sets the amount of coroutines")
+	flag.IntVar(&workerPool, "j", maxWorkerPool, "sets the amount of coroutines")
+	flag.Parse()
+
+	if domainName == "" {
+		fmt.Println("no domain name provided")
+		flag.Usage()
+		return
 	}
 
-	/*
-	   TODO:
-	   Allow the input of a specific WHOIS server from param
-	*/
-	if len(servers) == 0 || servers[0] == "" {
-		result, err := w.lookup(name+domain, IANA_SERVER, time.Second*15)
-		if err != nil {
-			return false, err
+	in := make(chan string, len(domain.Extensions))
+	out := make(chan string, len(domain.Extensions))
+
+	// Initialise worker pool
+	for i := 0; i < workerPool; i++ {
+		wg.Add(1)
+		runningWorkers++
+
+		go resolve(in, out, &wg)
+	}
+
+	fmt.Printf("Searching TLDs for domain name: %s\n", colour.SetColour(colour.ColourYellow, domainName))
+	start := time.Now()
+
+	for _, dn := range domain.Extensions {
+		in <- fmt.Sprintf("%s%s", domainName, dn)
+	}
+	// Close input channel since all inputs have been sent already
+	close(in)
+
+	// Inline goroutine to print out the output
+	wg.Add(1)
+	go func(output <-chan string, wg *sync.WaitGroup) {
+		defer wg.Done()
+
+		for {
+			select {
+			case result := <-output:
+				fmt.Println(result)
+			default:
+				// Once all workers are finished, there won't be any more results
+				if runningWorkers == 0 {
+					return
+				}
+			}
 		}
-		w.parser.Domain = domain
-		/*
-		   TODO:
-		   Parse response (internal.Parser) and find if it points to another WHOIS server
-		   If not, return; if yes, search for the final one
-		*/
-		ref, err := w.parser.GetReferServer(result)
-		if err != nil {
-			return false, err
-		}
+	}(out, &wg)
 
-		result, err = w.lookup(name+domain, ref, time.Second*15)
-		if err != nil {
-			return false, err
-		}
+	wg.Wait()
+	close(out)
 
-		if ok := w.parser.IsFound(result); !ok {
-			return false, nil
-		}
-	}
-	return true, nil
-}
+	end := time.Now()
+	dt := end.Sub(start)
 
-func (w *Whois) lookup(name, server string, timeout time.Duration) (string, error) {
-	conn, err := net.DialTimeout("tcp", net.JoinHostPort(server, DEFAULT_PORT), timeout)
-	if err != nil {
-		return "", err
-	}
-	defer conn.Close()
+	response := fmt.Sprintf("query took: %s, performed %d queries -- %d available, %d taken",
+		dt,
+		len(domain.Extensions),
+		availableCount,
+		takenCount,
+	)
 
-	conn.SetWriteDeadline(time.Now().Add(timeout))
-	padding := "\r\n"
-
-	payload := []byte(name + padding)
-	_, err = conn.Write(payload)
-	if err != nil {
-		return "", err
-	}
-
-	conn.SetReadDeadline(time.Now().Add(timeout))
-	response, err := io.ReadAll(conn)
-	if err != nil {
-		return "", err
-	}
-
-	return string(response), nil
+	fmt.Println(colour.SetColour(colour.ColourYellow, response))
 }
