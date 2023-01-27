@@ -57,7 +57,7 @@ func resolve(in <-chan string, out chan<- string, wg *sync.WaitGroup) {
 }
 
 func main() {
-	var maxWorkerPool int = runtime.GOMAXPROCS(0)
+	var maxWorkerPool int = runtime.GOMAXPROCS(0) * 2
 
 	flag.StringVar(&domainName, "domain", "", "domain name to look up")
 	flag.StringVar(&domainName, "d", "", "domain name to look up")
